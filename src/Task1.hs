@@ -6,6 +6,9 @@ module Task1 where
 
 -- Explicit import of Prelude to hide functions
 -- that are not supposed to be used in this assignment
+
+import Data.List (intercalate)
+import Data.Maybe (maybeToList)
 import Prelude hiding (foldl, foldr)
 
 -- * Type definitions
@@ -42,7 +45,16 @@ torder ::
   Tree a ->
   -- | List of values in specified order
   [a]
-torder = error "TODO: define torder"
+torder _ leafValue Leaf = maybeToList leafValue
+torder order leafValue (Branch nValue lTree rTree) = concat $ case order of
+  PreOrder -> [n, l, r]
+  InOrder -> [l, n, r]
+  PostOrder -> [l, r, n]
+  where
+    torder' = torder order leafValue
+    l = torder' lTree
+    n = [nValue]
+    r = torder' rTree
 
 -- | Returns values of given 'Forest' separated by optional separator
 -- where each 'Tree' is traversed in specified 'Order' with optional leaf value
@@ -66,4 +78,6 @@ forder ::
   Forest a ->
   -- | List of values in specified tree order
   [a]
-forder = error "TODO: define forder"
+forder order treeSeparator leafValue = (intercalate (maybeToList treeSeparator)) . (map torder')
+  where
+    torder' = torder order leafValue
