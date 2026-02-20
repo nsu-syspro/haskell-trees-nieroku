@@ -1,13 +1,14 @@
 {-# OPTIONS_GHC -Wall #-}
+
 -- The above pragma enables all warnings
 
 module Task3 where
 
 -- Explicit import of Prelude to hide functions
 -- that are not supposed to be used in this assignment
-import Prelude hiding (compare, foldl, foldr, Ordering(..))
 
-import Task1 (Tree(..))
+import Task1 (Tree (..))
+import Prelude hiding (Ordering (..), compare, foldl, foldr)
 
 -- * Type definitions
 
@@ -24,8 +25,7 @@ type Map k v = Tree (k, v)
 -- Branch (2,'a') (Branch (1,'b') Leaf Leaf) (Branch (3,'c') Leaf Leaf)
 -- >>> listToMap [] :: Map Int Char
 -- Leaf
---
-listToMap :: Ord k => [(k, v)] -> Map k v
+listToMap :: (Ord k) => [(k, v)] -> Map k v
 listToMap = error "TODO: define listToMap"
 
 -- | Conversion from 'Map' to association list sorted by key
@@ -36,7 +36,6 @@ listToMap = error "TODO: define listToMap"
 -- [(1,'b'),(2,'a'),(3,'c')]
 -- >>> mapToList Leaf
 -- []
---
 mapToList :: Map k v -> [(k, v)]
 mapToList = error "TODO: define mapToList"
 
@@ -51,8 +50,7 @@ mapToList = error "TODO: define mapToList"
 -- Just 'b'
 -- >>> mlookup 'a' Leaf
 -- Nothing
---
-mlookup :: Ord k => k -> Map k v -> Maybe v
+mlookup :: (Ord k) => k -> Map k v -> Maybe v
 mlookup = error "TODO: define mlookup"
 
 -- | Inserts given key and value into given 'Map'
@@ -68,8 +66,7 @@ mlookup = error "TODO: define mlookup"
 -- Branch (2,'a') (Branch (1,'X') Leaf Leaf) (Branch (3,'c') Leaf Leaf)
 -- >>> minsert 1 'X' Leaf
 -- Branch (1,'X') Leaf Leaf
---
-minsert :: Ord k => k -> v -> Map k v -> Map k v
+minsert :: (Ord k) => k -> v -> Map k v -> Map k v
 minsert = error "TODO: define minsert"
 
 -- | Deletes given key from given 'Map'
@@ -83,6 +80,5 @@ minsert = error "TODO: define minsert"
 -- Branch (2,'a') Leaf (Branch (3,'c') Leaf Leaf)
 -- >>> mdelete 'a' Leaf
 -- Leaf
---
-mdelete :: Ord k => k -> Map k v -> Map k v
+mdelete :: (Ord k) => k -> Map k v -> Map k v
 mdelete = error "TODO: define mdelete"

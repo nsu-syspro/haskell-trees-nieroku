@@ -1,19 +1,20 @@
 {-# OPTIONS_GHC -Wall #-}
+
 -- The above pragma enables all warnings
 
 module Task2 where
 
 -- Explicit import of Prelude to hide functions
 -- that are not supposed to be used in this assignment
-import Prelude hiding (compare, foldl, foldr, Ordering(..))
 
-import Task1 (Tree(..))
+import Task1 (Tree (..))
+import Prelude hiding (Ordering (..), compare, foldl, foldr)
 
 -- * Type definitions
 
 -- | Ordering enumeration
 data Ordering = LT | EQ | GT
-  deriving Show
+  deriving (Show)
 
 -- | Binary comparison function indicating whether first argument is less, equal or
 -- greater than the second one (returning 'LT', 'EQ' or 'GT' respectively)
@@ -31,8 +32,7 @@ type Cmp a = a -> a -> Ordering
 -- EQ
 -- >>> compare "Haskell" "C++"
 -- GT
---
-compare :: Ord a => Cmp a
+compare :: (Ord a) => Cmp a
 compare = error "TODO: define compare"
 
 -- | Conversion of list to binary search tree
@@ -44,7 +44,6 @@ compare = error "TODO: define compare"
 -- Branch 2 (Branch 1 Leaf Leaf) (Branch 3 Leaf Leaf)
 -- >>> listToBST compare ""
 -- Leaf
---
 listToBST :: Cmp a -> [a] -> Tree a
 listToBST = error "TODO: define listToBST"
 
@@ -60,7 +59,6 @@ listToBST = error "TODO: define listToBST"
 -- [1,2,3]
 -- >>> bstToList Leaf
 -- []
---
 bstToList :: Tree a -> [a]
 bstToList = error "TODO: define bstToList"
 
@@ -75,7 +73,6 @@ bstToList = error "TODO: define bstToList"
 -- True
 -- >>> isBST compare (Branch 5 (Branch 1 Leaf Leaf) (Branch 3 Leaf Leaf))
 -- False
---
 isBST :: Cmp a -> Tree a -> Bool
 isBST = error "TODO: define isBST"
 
@@ -93,7 +90,6 @@ isBST = error "TODO: define isBST"
 -- Nothing
 -- >>> tlookup (\x y -> compare (x `mod` 3) (y `mod` 3)) 5 (Branch 2 (Branch 0 Leaf Leaf) (Branch 2 Leaf Leaf))
 -- Just 2
---
 tlookup :: Cmp a -> a -> Tree a -> Maybe a
 tlookup = error "TODO: define tlookup"
 
@@ -111,7 +107,6 @@ tlookup = error "TODO: define tlookup"
 -- Branch 2 (Branch 1 Leaf Leaf) (Branch 3 Leaf Leaf)
 -- >>> tinsert compare 'a' Leaf
 -- Branch 'a' Leaf Leaf
---
 tinsert :: Cmp a -> a -> Tree a -> Tree a
 tinsert = error "TODO: define tinsert"
 
@@ -127,6 +122,5 @@ tinsert = error "TODO: define tinsert"
 -- Branch 2 Leaf (Branch 3 Leaf Leaf)
 -- >>> tdelete compare 'a' Leaf
 -- Leaf
---
 tdelete :: Cmp a -> a -> Tree a -> Tree a
 tdelete = error "TODO: define tdelete"
