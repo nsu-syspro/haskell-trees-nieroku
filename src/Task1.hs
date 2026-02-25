@@ -7,9 +7,7 @@ module Task1 where
 -- Explicit import of Prelude to hide functions
 -- that are not supposed to be used in this assignment
 
-import Data.List (intercalate)
-import Data.Maybe (maybeToList)
-import Prelude hiding (foldl, foldr)
+import Prelude hiding (concat, foldl, foldr)
 
 -- * Type definitions
 
@@ -81,3 +79,22 @@ forder ::
 forder order treeSeparator leafValue = (intercalate (maybeToList treeSeparator)) . (map torder')
   where
     torder' = torder order leafValue
+
+maybeToList :: Maybe a -> [a]
+maybeToList (Just x) = [x]
+maybeToList Nothing = []
+
+concat :: [[a]] -> [a]
+concat [] = []
+concat [x] = x
+concat (x : xs) = x ++ concat xs
+
+intersperse :: a -> [a] -> [a]
+intersperse sep = intersperse'
+  where
+    intersperse' [] = []
+    intersperse' [x] = [x]
+    intersperse' (x : xs) = x : sep : intersperse' xs
+
+intercalate :: [a] -> [[a]] -> [a]
+intercalate sep = concat . (intersperse sep)
