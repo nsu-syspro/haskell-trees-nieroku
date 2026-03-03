@@ -7,7 +7,6 @@ module Task2 where
 -- Explicit import of Prelude to hide functions
 -- that are not supposed to be used in this assignment
 
-import Data.Ord qualified as Prelude
 import Task1
 import Prelude hiding (Ordering (..), compare, foldl, foldr)
 
@@ -34,10 +33,10 @@ type Cmp a = a -> a -> Ordering
 -- >>> compare "Haskell" "C++"
 -- GT
 compare :: (Ord a) => Cmp a
-compare a b = case Prelude.compare a b of
-  Prelude.LT -> LT
-  Prelude.EQ -> EQ
-  Prelude.GT -> GT
+compare a b
+  | a < b = LT
+  | a == b = EQ
+  | otherwise = GT
 
 -- | Conversion of list to binary search tree
 -- using given comparison function
