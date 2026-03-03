@@ -1,19 +1,20 @@
 {-# OPTIONS_GHC -Wall #-}
+
 -- The above pragma enables all warnings
 
 module Task2 where
 
 -- Explicit import of Prelude to hide functions
 -- that are not supposed to be used in this assignment
-import Prelude hiding (compare, foldl, foldr, Ordering(..))
 
-import Task1 (Tree(..))
+import Task1
+import Prelude hiding (Ordering (..), compare, foldl, foldr)
 
 -- * Type definitions
 
 -- | Ordering enumeration
 data Ordering = LT | EQ | GT
-  deriving Show
+  deriving (Show, Eq)
 
 -- | Binary comparison function indicating whether first argument is less, equal or
 -- greater than the second one (returning 'LT', 'EQ' or 'GT' respectively)
@@ -31,9 +32,11 @@ type Cmp a = a -> a -> Ordering
 -- EQ
 -- >>> compare "Haskell" "C++"
 -- GT
---
-compare :: Ord a => Cmp a
-compare = error "TODO: define compare"
+compare :: (Ord a) => Cmp a
+compare a b
+  | a < b = LT
+  | a == b = EQ
+  | otherwise = GT
 
 -- | Conversion of list to binary search tree
 -- using given comparison function
@@ -44,9 +47,8 @@ compare = error "TODO: define compare"
 -- Branch 2 (Branch 1 Leaf Leaf) (Branch 3 Leaf Leaf)
 -- >>> listToBST compare ""
 -- Leaf
---
 listToBST :: Cmp a -> [a] -> Tree a
-listToBST = error "TODO: define listToBST"
+listToBST cmp = foldl (flip $ tinsert cmp) Leaf
 
 -- | Conversion from binary search tree to list
 --
@@ -60,9 +62,8 @@ listToBST = error "TODO: define listToBST"
 -- [1,2,3]
 -- >>> bstToList Leaf
 -- []
---
 bstToList :: Tree a -> [a]
-bstToList = error "TODO: define bstToList"
+bstToList = torder InOrder Nothing
 
 -- | Tests whether given tree is a valid binary search tree
 -- with respect to given comparison function
@@ -75,9 +76,12 @@ bstToList = error "TODO: define bstToList"
 -- True
 -- >>> isBST compare (Branch 5 (Branch 1 Leaf Leaf) (Branch 3 Leaf Leaf))
 -- False
---
 isBST :: Cmp a -> Tree a -> Bool
-isBST = error "TODO: define isBST"
+isBST cmp = isUniqueSorted . bstToList
+  where
+    isUniqueSorted [] = True
+    isUniqueSorted [_] = True
+    isUniqueSorted (x : xs@(y : _)) = (cmp x y) == LT && isUniqueSorted xs
 
 -- | Searches given binary search tree for
 -- given value with respect to given comparison
@@ -93,9 +97,14 @@ isBST = error "TODO: define isBST"
 -- Nothing
 -- >>> tlookup (\x y -> compare (x `mod` 3) (y `mod` 3)) 5 (Branch 2 (Branch 0 Leaf Leaf) (Branch 2 Leaf Leaf))
 -- Just 2
---
 tlookup :: Cmp a -> a -> Tree a -> Maybe a
-tlookup = error "TODO: define tlookup"
+tlookup cmp value = tlookup'
+  where
+    tlookup' Leaf = Nothing
+    tlookup' (Branch nodeValue leftTree rightTree) = case (cmp value nodeValue) of
+      LT -> tlookup' leftTree
+      EQ -> Just nodeValue
+      GT -> tlookup' rightTree
 
 -- | Inserts given value into given binary search tree
 -- preserving its BST properties with respect to given comparison
@@ -111,9 +120,14 @@ tlookup = error "TODO: define tlookup"
 -- Branch 2 (Branch 1 Leaf Leaf) (Branch 3 Leaf Leaf)
 -- >>> tinsert compare 'a' Leaf
 -- Branch 'a' Leaf Leaf
---
 tinsert :: Cmp a -> a -> Tree a -> Tree a
-tinsert = error "TODO: define tinsert"
+tinsert cmp value = tinsert'
+  where
+    tinsert' Leaf = Branch value Leaf Leaf
+    tinsert' (Branch nodeValue leftTree rightTree) = case (cmp value nodeValue) of
+      LT -> Branch nodeValue (tinsert' leftTree) rightTree
+      EQ -> Branch value leftTree rightTree
+      GT -> Branch nodeValue leftTree (tinsert' rightTree)
 
 -- | Deletes given value from given binary search tree
 -- preserving its BST properties with respect to given comparison
@@ -127,6 +141,27 @@ tinsert = error "TODO: define tinsert"
 -- Branch 2 Leaf (Branch 3 Leaf Leaf)
 -- >>> tdelete compare 'a' Leaf
 -- Leaf
---
 tdelete :: Cmp a -> a -> Tree a -> Tree a
-tdelete = error "TODO: define tdelete"
+tdelete cmp value = tdelete'
+  where
+    tdelete' Leaf = Leaf
+    tdelete' (Branch nodeValue leftTree rightTree) = case (cmp value nodeValue) of
+      LT -> Branch nodeValue (tdelete' leftTree) rightTree
+      EQ -> merge leftTree rightTree
+      GT -> Branch nodeValue leftTree (tdelete' rightTree)
+    --
+    merge tree Leaf = tree
+    merge Leaf tree = tree
+    merge leftTree rightTree = Branch (findMin rightTree) leftTree (deleteMin rightTree)
+    --
+    findMin Leaf = undefined
+    findMin (Branch nodeValue Leaf _) = nodeValue
+    findMin (Branch _ leftTree _) = findMin leftTree
+    --
+    deleteMin Leaf = Leaf
+    deleteMin (Branch _ Leaf rightTree) = rightTree
+    deleteMin (Branch nodeValue leftTree rightTree) = Branch nodeValue (deleteMin leftTree) rightTree
+
+foldl :: (b -> a -> b) -> b -> [a] -> b
+foldl _ acc [] = acc
+foldl f acc (x : xs) = foldl f (f acc x) xs

@@ -1,24 +1,26 @@
 {-# OPTIONS_GHC -Wall #-}
+
 -- The above pragma enables all warnings
 
 module Task1 where
 
 -- Explicit import of Prelude to hide functions
 -- that are not supposed to be used in this assignment
-import Prelude hiding (foldl, foldr)
+
+import Prelude hiding (concat, foldl, foldr)
 
 -- * Type definitions
 
 -- | Binary tree
 data Tree a = Leaf | Branch a (Tree a) (Tree a)
-  deriving Show
+  deriving (Show)
 
 -- | Forest (i.e. list of 'Tree's)
 type Forest a = [Tree a]
 
 -- | Tree traversal order
 data Order = PreOrder | InOrder | PostOrder
-  deriving Show
+  deriving (Show)
 
 -- * Function definitions
 
@@ -32,12 +34,25 @@ data Order = PreOrder | InOrder | PostOrder
 -- ".A.B."
 -- >>> torder PostOrder (Just '.') (Branch 'A' Leaf (Branch 'B' Leaf Leaf))
 -- "...BA"
---
-torder :: Order    -- ^ Order of resulting traversal
-       -> Maybe a  -- ^ Optional leaf value
-       -> Tree a   -- ^ Tree to traverse
-       -> [a]      -- ^ List of values in specified order
-torder = error "TODO: define torder"
+torder ::
+  -- | Order of resulting traversal
+  Order ->
+  -- | Optional leaf value
+  Maybe a ->
+  -- | Tree to traverse
+  Tree a ->
+  -- | List of values in specified order
+  [a]
+torder _ leafValue Leaf = maybeToList leafValue
+torder order leafValue (Branch nValue lTree rTree) = concat $ case order of
+  PreOrder -> [n, l, r]
+  InOrder -> [l, n, r]
+  PostOrder -> [l, r, n]
+  where
+    torder' = torder order leafValue
+    l = torder' lTree
+    n = [nValue]
+    r = torder' rTree
 
 -- | Returns values of given 'Forest' separated by optional separator
 -- where each 'Tree' is traversed in specified 'Order' with optional leaf value
@@ -50,11 +65,36 @@ torder = error "TODO: define torder"
 -- ".|.C.|.A.B."
 -- >>> forder PostOrder (Just '|') (Just '.') [Leaf, Branch 'C' Leaf Leaf, Branch 'A' Leaf (Branch 'B' Leaf Leaf)]
 -- ".|..C|...BA"
---
-forder :: Order     -- ^ Order of tree traversal
-       -> Maybe a   -- ^ Optional separator between resulting tree orders
-       -> Maybe a   -- ^ Optional leaf value
-       -> Forest a  -- ^ List of trees to traverse
-       -> [a]       -- ^ List of values in specified tree order
-forder = error "TODO: define forder"
+forder ::
+  -- | Order of tree traversal
+  Order ->
+  -- | Optional separator between resulting tree orders
+  Maybe a ->
+  -- | Optional leaf value
+  Maybe a ->
+  -- | List of trees to traverse
+  Forest a ->
+  -- | List of values in specified tree order
+  [a]
+forder order treeSeparator leafValue = (intercalate (maybeToList treeSeparator)) . (map torder')
+  where
+    torder' = torder order leafValue
 
+maybeToList :: Maybe a -> [a]
+maybeToList (Just x) = [x]
+maybeToList Nothing = []
+
+concat :: [[a]] -> [a]
+concat [] = []
+concat [x] = x
+concat (x : xs) = x ++ concat xs
+
+intersperse :: a -> [a] -> [a]
+intersperse sep = intersperse'
+  where
+    intersperse' [] = []
+    intersperse' [x] = [x]
+    intersperse' (x : xs) = x : sep : intersperse' xs
+
+intercalate :: [a] -> [[a]] -> [a]
+intercalate sep = concat . (intersperse sep)
